@@ -28,33 +28,64 @@ package telecom.eu.parsing.website.project.parser;
 import java.util.ArrayList;
 
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
 
 
 
 public class LaunchWebParsing {
 
 	public static void main(String[] args) {
-		
+
 		BasicConfigurator.configure();
-		/* ****************************************Paramters********************************************* */	
-		String pageUrlForExample="http://forums.bethsoft.com/topic/1397803-brink-sucks/";
-		String StartpageUrl="http://forums.bethsoft.com/";
-				
-		ArrayList<String> racines = new ArrayList<String>();
-		racines.add("http://forums.bethsoft.com/");
+
+		//getting the config file URL
+		String configFilePath = "pathToConfigFile";
+		ReadConfigFile readConfigFile = new ReadConfigFile(configFilePath);
+
+		/* *********** read config file to get Paramters******** */	
+		String pageUrlForExample=(String) readConfigFile.readParamInXmlFile("samplePageurl");;
+		if(pageUrlForExample==null) {
+			Logger.getLogger(LaunchWebParsing.class).debug("the param samplePageUrl is not set");
+		}
+
+		String StartpageUrl=(String) readConfigFile.readParamInXmlFile("forumToparseURL");
+		if(StartpageUrl==null) {
+			Logger.getLogger(LaunchWebParsing.class).debug("the param forumToparseURL is not set");
+		}
+		
+		@SuppressWarnings("unchecked")
+		ArrayList<String> racines = (ArrayList<String>) readConfigFile.readParamInXmlFile("keyWordsInURL");
 		
 		//post sample, the parser will use it to find the tags of the post
-		String date = "22 July 2012 - 04:17 PM";
-		String author = "BioHazzard831";
-		String message = "Exactly, everyone does have different opinions, but I don't think it's right for the cashier to just say that the game is awful and that it's just a waste of money, they should just let you to but the game without trying to bring you down on your purchase. ";
+		String date =(String) readConfigFile.readParamInXmlFile("postDate");
+		if(date==null) {
+			Logger.getLogger(LaunchWebParsing.class).debug("the param postDate is not set");
+		}
 
-		// File where post will be store
-		String postFileName ="C:/Users/AissataJo/Desktop/ProjetMineur/Resultats/test1.csv";
+		String author = (String) readConfigFile.readParamInXmlFile("postAurhor");
+		if(author==null) {
+			Logger.getLogger(LaunchWebParsing.class).debug("the param postAurhor is not set");
+		}
+
+		String message = (String) readConfigFile.readParamInXmlFile("postMessage");
+		if(message==null) {
+			Logger.getLogger(LaunchWebParsing.class).debug("the param postMessage is not set");
+		}
 		
+		// File where post will be store
+		String postFileName =(String) readConfigFile.readParamInXmlFile("pathToPostsFile");
+		if(postFileName==null) {
+			Logger.getLogger(LaunchWebParsing.class).debug("the param pathToPostsFile is not set");
+		}
+
 		boolean isPostIdExists = true;
 
 		/* *****************end paramters *******************************/
 		
+		if(pageUrlForExample==null||StartpageUrl==null||racines.size()>0||date==null||author==null||message==null||postFileName==null){
+			Logger.getLogger(LaunchWebParsing.class).debug("Error : At least one of the params is not set");
+			return;
+		}
 		InitParser.startParser(pageUrlForExample,StartpageUrl, date, author, message, postFileName, racines, isPostIdExists);
 
 	}
