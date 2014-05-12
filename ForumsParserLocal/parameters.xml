@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<parameters>
+<!-- A page wcich contents post, it is used to analyze posts container characteristic -->
+<samplePageUrl></samplePageUrl>
+
+<!-- A post sample, it is used to get the post container tag and class -->
+<postSample>
+	<postDate></postDate>
+	<postAurhor></postAurhor>
+	<postMessage></postMessage>
+	<isPostIdExist></isPostIdExist>
+</postSample>
+
+<!--path of the file in which the program saves all posts-->
+<pathToPostsFile></pathToPostsFile>
+
+<!--The url of the forum to parse -->
+<forumToparseURL></forumToparseURL>
+
+<!--keywords that the program checks in a page url before parsing it and extract all posts, you can add many keywords-->
+<keyWordsInURL></keyWordsInURL>
+</parameters>
