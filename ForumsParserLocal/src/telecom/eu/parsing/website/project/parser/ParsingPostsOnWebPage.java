@@ -60,9 +60,10 @@ public class ParsingPostsOnWebPage {
 		for (int i=0; i< nodes.size(); i++){
 			if (nodes.get(i).childNodes().size()>0) {
 				// remove the html tag, to get only text and compare it with tje message, date, author
-				String content = nodes.get(i).toString().replaceAll("\\<.*?>","");
+				//String content = nodes.get(i).toString().replaceAll("\\<.*?>","");
 				// parse the content to get text in UTF-8 without html accent 
-				String contentParsed = Jsoup.parse(content).text();
+				//String contentParsed = Jsoup.parse(content).text();
+				String contentParsed = Jsoup.parse(nodes.get(i).outerHtml()).text();
 				if( contentParsed.toLowerCase().contains(author.toLowerCase()) &&
 						contentParsed.toLowerCase().contains(message.toLowerCase()) &&
 						contentParsed.toLowerCase().contains(date.toLowerCase())) {
@@ -84,9 +85,10 @@ public class ParsingPostsOnWebPage {
 		for (int i=0; i< nodes.size(); i++){
 			if (nodes.get(i).childNodes().size()>0) {
 				// remove the html tag, to get only text and compare it with  message, date, author
-				String content = nodes.get(i).toString().replaceAll("\\<.*?>","");
+				//String content = nodes.get(i).toString().replaceAll("\\<.*?>","");
 				// parse the content to get text in UTF-8 without html accent 
-				String contentParsed = Jsoup.parse(content).text();
+				//String contentParsed = Jsoup.parse(content).text();
+				String contentParsed = Jsoup.parse(nodes.get(i).outerHtml()).text();
 				if( contentParsed.toLowerCase().contains(text.toLowerCase())) {
 					return getElementContainer( nodes.get(i),  text);
 				} 
@@ -118,7 +120,7 @@ public class ParsingPostsOnWebPage {
 
 	/**
 	 * this method  gets the  container of all posts
-	 * @param text the text to search
+	 * @param text : the text to search
 	 * @return : the node that contains the text
 	 */
 	public Node getPostContainerWithAttributeIdAndClass(Node n){
@@ -161,7 +163,7 @@ public class ParsingPostsOnWebPage {
 		}
 	}
 
-	
+
 	/**
 	 * this method sets the param of the post container 
 	 * @param body the body of  the page
@@ -169,7 +171,7 @@ public class ParsingPostsOnWebPage {
 	 * @param message the example of message to search
 	 * @param author the example of author to search
 	 */
-	public void setPostsParameters(Element body, String date, String message, String author, boolean isPostIdExists) {
+	public void setPostsParameters(Element body, String date, String message, String author) {
 		Logger.getLogger(this.getClass() ).debug("method setPostsParameters is call ");
 		String postContainerClass=null;
 		String messageContainerClass=null;
@@ -183,11 +185,9 @@ public class ParsingPostsOnWebPage {
 		String allPostsContainerTag=null;
 
 		Node postNode;
-	    if (isPostIdExists) {
-	    	postNode=getPostContainerWithAttributeIdAndClass(getPostContainer(body, date, message, author));
-	    }else{
-	    	postNode=getPostContainerWithAttributeIdAndClass(getPostContainer(body, date, message, author));
-	    }
+		//postNode=getPostContainerWithAttributeIdAndClass(getPostContainer(body, date, message, author));
+		postNode = searchDirectParentWithAttribute(getPostContainer(body, date, message, author));
+
 		if( postNode != null ) {
 			postContainerTag= postNode.nodeName();
 			Attributes attributes =postNode.attributes();
@@ -199,8 +199,9 @@ public class ParsingPostsOnWebPage {
 				}
 
 			}
-			Node parent = getAllPostsContainer(postNode,postContainerTag,postContainerClass);
-			if (parent!=null){
+
+			Node parent = searchDirectParentWithAttribute(getAllPostsContainer(postNode,postContainerTag,postContainerClass));
+			if (parent != null){
 				allPostsContainerTag = parent.nodeName();
 				Attributes attributesParent =postNode.parent().attributes();
 				List <Attribute> list_attributesParent= attributesParent.asList();
@@ -278,15 +279,15 @@ public class ParsingPostsOnWebPage {
 		Logger.getLogger(this.getClass() ).debug("Message container Tag : "+messageContainerTag+"."+messageContainerClass);
 		Logger.getLogger(this.getClass() ).debug("All Posts container Tag : "+allPostsContainerTag+"."+allPostsContainerClass);
 	}
-	
-	
+
+
 	/**
 	 * this method search all posts on given page and write them to a csv file
 	 * @param body
 	 * @param writeToCSV
 	 */
 
-	public void findAllPostsAndWriteToCSV(Element body, WriteToCSV writeToCSV){
+	public void findAllPosts(Element body ){
 		Logger.getLogger(this.getClass() ).debug("Start parsing data on page");
 		ids = new ArrayList<String>();
 		authors = new ArrayList<String>();
@@ -294,54 +295,55 @@ public class ParsingPostsOnWebPage {
 		messages = new ArrayList<String>();
 		if (body!=null) {
 			Logger.getLogger(this.getClass() ).debug("Node name "+ body.nodeName());
-			Elements elementsAllPostContainer = body.select(PostsParameters.getAllPostsContainerTag()+"."
+			/*Elements elementsAllPostContainer = body.select(PostsParameters.getAllPostsContainerTag()+"."
 					+PostsParameters.getAllPostsContainerClass());
 			for (int i=0; i< elementsAllPostContainer.size(); i++){
-				Element element = elementsAllPostContainer.get(i);
-				Elements elementsPosts = element.select(PostsParameters.getPostContainerTag()+"."+PostsParameters.getPostContainerClass());
-				for (int j=0; j<elementsPosts.size(); j++ ){
-					Element elementPost = elementsPosts.get(j);
-					String textMessage = null;
-					String textAuthor = null;
-					String textDate = null;
-					String post_id = elementPost.id();
+				Element element = elementsAllPostContainer.get(i);*/
+			Elements elementsPosts = body.select(PostsParameters.getPostContainerTag()+"."+PostsParameters.getPostContainerClass());
+			for (int j=0; j<elementsPosts.size(); j++ ){
+				Element elementPost = elementsPosts.get(j);
+				String textMessage = null;
+				String textAuthor = null;
+				String textDate = null;
+				String post_id = elementPost.id();
 
-					Element elementMessage = null;
-					Element elementAuthor = null;
-					Element elementDate = null;
+				Element elementMessage = null;
+				Element elementAuthor = null;
+				Element elementDate = null;
 
-					if (elementPost.select(PostsParameters.getMessageContainerTag()+"."+PostsParameters.getMessageContainerClass()).size()>0) {
-						elementMessage = elementPost.select(PostsParameters.getMessageContainerTag()+"."
-								+PostsParameters.getMessageContainerClass()).first();
-					}
+				if (elementPost.select(PostsParameters.getMessageContainerTag()+"."+PostsParameters.getMessageContainerClass()).size()>0) {
+					elementMessage = elementPost.select(PostsParameters.getMessageContainerTag()+"."
+							+PostsParameters.getMessageContainerClass()).first();
+				}
 
-					if(elementPost.select(PostsParameters.getAuthorContainerTag()+"."+PostsParameters.getAuthorContainerClass()).size()>0) {
-						elementAuthor = elementPost.select(PostsParameters.getAuthorContainerTag()+"."
-								+PostsParameters.getAuthorContainerClass()).first();
-					}
+				if(elementPost.select(PostsParameters.getAuthorContainerTag()+"."+PostsParameters.getAuthorContainerClass()).size()>0) {
+					elementAuthor = elementPost.select(PostsParameters.getAuthorContainerTag()+"."
+							+PostsParameters.getAuthorContainerClass()).first();
+				}
 
-					if (elementPost.select(PostsParameters.getDateContainerTag()+"."+PostsParameters.getDateContainerClass()).size()>0) {
-						elementDate = elementPost.select(PostsParameters.getDateContainerTag()+"."
-								+PostsParameters.getDateContainerClass()).first();
-					}
+				if (elementPost.select(PostsParameters.getDateContainerTag()+"."+PostsParameters.getDateContainerClass()).size()>0) {
+					elementDate = elementPost.select(PostsParameters.getDateContainerTag()+"."
+							+PostsParameters.getDateContainerClass()).first();
+				}
 
-					if (elementMessage!=null){
-						textMessage = Jsoup.parse(elementMessage.toString().replaceAll("\\<.*?>","")).text();
-					}
+				if (elementMessage!=null){
+					textMessage = Jsoup.parse(elementMessage.toString().replaceAll("\\<.*?>","")).text();
+				}
 
-					if (elementAuthor!=null){
-						textAuthor = Jsoup.parse(elementAuthor.toString().replaceAll("\\<.*?>","")).text();
-					}
-					if (elementDate!=null){
-						textDate = Jsoup.parse(elementDate.toString().replaceAll("\\<.*?>","")).text();
-					}
+				if (elementAuthor!=null){
+					textAuthor = Jsoup.parse(elementAuthor.toString().replaceAll("\\<.*?>","")).text();
+				}
+				if (elementDate!=null){
+					textDate = Jsoup.parse(elementDate.toString().replaceAll("\\<.*?>","")).text();
+				}
+				if(textMessage!=null && textAuthor!=null && textDate!=null){
 					ids.add(post_id);
 					authors.add(textAuthor);
 					dates.add(textDate);
 					messages.add(textMessage);
 				}
-				//writeToCSV.WritePostToCSVFile(post_id, textAuthor, textDate, textMessage);
 			}
+			//}
 		} else {
 			Logger.getLogger(this.getClass() ).debug("Error cannot parse the webpage");
 		}
@@ -349,26 +351,40 @@ public class ParsingPostsOnWebPage {
 	}
 
 
-	
-	public void processData(String link, WriteToCSV writeToCSV){
-			Document doc;
-			try {
-				doc = Jsoup.connect(link).userAgent("Mozilla").get();
-				Element body = doc.body();
-				if(body!=null) {
-					findAllPostsAndWriteToCSV(body, writeToCSV);
-				}
-			} catch (SocketTimeoutException a){
-				processData(link, writeToCSV);
-				return;
-			} catch (IOException e) {
-				Logger.getLogger(InitParser.class).debug("Exception :"+e.getMessage() + " Description :"+ e.toString());
-				return;
-			} 		
-			writeToCSV.WritePostToCSVFile(ids, authors, dates, messages);
+	/**
+	 * process data on web page and store them to csv file
+	 * @param link
+	 * @param writeToCSV
+	 * @param howTimes
+	 */
+	public void processData(String link, WriteToCSV writeToCSV, int howTimes){
+		Document doc;
+		try {
+			doc = Jsoup.connect(link).userAgent("Mozilla").get();
+			Element body = doc.body();
+			if(body!=null) {
+				findAllPosts(body);
+			}
+		} catch (SocketTimeoutException a){
+			//try three times the same URL if timeoutexecption
+			if (howTimes+1==3){
+				OutputParams.appendToFailedUrlsFile(link);
+				Logger.getLogger(InitParser.class).debug("Can't process this URL :" + link +" Content, cause time out exception");	
+			} else {
+				processData(link, writeToCSV, howTimes+1);
+			}
+			return;
+		} catch (IOException e) {
+			Logger.getLogger(InitParser.class).debug("Exception :"+e.getMessage() + " Description :"+ e.toString());
+			return;
+		} 
+
+		writeToCSV.WritePostToCSVFile(ids, authors, dates, messages);
+
+		OutputParams.appendToSuccedUrlsFile(link);
 	}
-	
-	
+
+
 	/**
 	 * it removes spaces between class names and replaces them by a point
 	 * @param className

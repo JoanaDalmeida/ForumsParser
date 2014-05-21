@@ -34,26 +34,64 @@ import org.jsoup.nodes.Document;
 
 public class InitParser {
 
+
 	public static void startParser(String StartPageUrl,String HomeURL, String date, String author,  String message, 
-			String fileName, ArrayList<String> racines, boolean isPostIdExists ){
-		Document doc;
-		try {
-			String pageUrl=StartPageUrl;
-			doc = Jsoup.connect(pageUrl).userAgent("Mozilla").get();
+			boolean useParametersFile, String postsParamsInput, boolean useUrlsInFile, String urlsFileName,
+			String postsFileName,String paramsfileName,String failedUrlsFileName,String succedUrlsFileName,
+			ArrayList<String> keyWordsInURL, ArrayList<String> exclusionKeyWords,
+			boolean usePagination, ArrayList<String> keyWordsPagination){
 
-			//init params
-			InitAllParam.initPostParam(doc, date, author, message, isPostIdExists);	
+		boolean initParamsOk=false;
+		if(useParametersFile) {
+			initParamsOk=ReadParametersFile.setParametes(postsParamsInput);
+		} else {
+			Document doc;
+			try {
+				String pageUrl=StartPageUrl;
+				doc = Jsoup.connect(pageUrl).userAgent("Mozilla").get();
 
+				//init params
+				InitAllParam.initPostParam(doc, date, author, message);	
+				//prompt a confirmation
+				String[] parameters = {PostsParameters.getAllPostsContainerTag(), PostsParameters.getAllPostsContainerClass(),
+						PostsParameters.getPostContainerTag(), PostsParameters.getPostContainerClass(),
+						PostsParameters.getDateContainerTag(), PostsParameters.getDateContainerClass(),
+						PostsParameters.getAuthorContainerTag(), PostsParameters.getAuthorContainerClass(),
+						PostsParameters.getMessageContainerTag(), PostsParameters.getMessageContainerClass() };
+
+				initParamsOk = ConfirmationDialog.confirmParams(parameters);
+				if (initParamsOk){
+					PostsParameters.saveParamsToFile(paramsfileName);
+				}
+			} catch (IOException e) {
+				Logger.getLogger(InitParser.class).debug("Exception :"+e.getMessage() + " Description :"+ e.toString());
+			}
+		}
+
+
+		////start parsing 
+		if (initParamsOk){
 			/*the csv file that will contain all posts*/
-			WriteToCSV writeToCSV = new WriteToCSV(fileName);
+			WriteToCSV writeToCSV = new WriteToCSV(postsFileName);
+			OutputParams.setOutputParams(failedUrlsFileName, succedUrlsFileName, postsFileName, paramsfileName);
 
-			////start parsing 
 			Logger.getLogger(InitParser.class).debug("****************Start parsing***********");
 			ParsingPostsOnWebPage parsingPostsOnWebPage =  new ParsingPostsOnWebPage();
-			Crawler.processPage(HomeURL, racines,parsingPostsOnWebPage,writeToCSV);
-			 
-		} catch (IOException e) {
-			Logger.getLogger(InitParser.class).debug("Exception :"+e.getMessage() + " Description :"+ e.toString());
+			if(usePagination){
+				if(!useUrlsInFile){
+					Crawler.processPageByPagination(HomeURL,keyWordsPagination, exclusionKeyWords, parsingPostsOnWebPage, writeToCSV);
+				} else {
+					Crawler.processPage(urlsFileName,parsingPostsOnWebPage,writeToCSV);
+				}
+			} else {
+				if(!useUrlsInFile){
+					Crawler.processPage(HomeURL, keyWordsInURL, exclusionKeyWords, parsingPostsOnWebPage, writeToCSV);
+				} else {
+					Crawler.processPage(urlsFileName,parsingPostsOnWebPage,writeToCSV);
+				}
+			}
+		} else {
+			Logger.getLogger(InitParser.class).debug("***The Step : Parameters Initialisation Failed, Can't continue!***");
 		}
 
 	}

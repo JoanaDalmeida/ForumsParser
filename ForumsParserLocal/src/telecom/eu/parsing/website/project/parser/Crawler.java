@@ -27,12 +27,15 @@
 
 package telecom.eu.parsing.website.project.parser;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
 
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
@@ -41,45 +44,82 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public class Crawler {
-
-	@SuppressWarnings("rawtypes")
-	private static HashSet listURLs = new HashSet<>();
-	@SuppressWarnings("unchecked")
-	public static void processPage(String Url, ArrayList<String> racines, ParsingPostsOnWebPage parsingPostsOnWebPage,WriteToCSV writeToCSV ) {
-		Document doc;
-		if(verifyUrl(Url)!=null){
-			if (listURLs.add(Url) && listURLs.size()<500) { 
-				try {
-					doc = Jsoup.connect(Url).userAgent("Mozilla").get();
-					if(doc!=null){
-						Element elt = doc.body();
-						if(elt!=null){
-							Elements links =elt.select("a[href]");
-							for(Element link: links){
-								for(int i=0; i<racines.size(); i++){
-									if(link.attr("abs:href").contains(racines.get(i))) {
-										Logger.getLogger(Crawler.class).debug(Url);
-										parsingPostsOnWebPage.processData(Url,writeToCSV);
-										processPage(link.attr("abs:href"), racines, parsingPostsOnWebPage, writeToCSV);
-										break;
-									}
-								}
-
-							}
-						}
+	public static void processPage(String Url, ArrayList<String> keyWordsInURL,ArrayList<String> exclusionKeyWords,
+			ParsingPostsOnWebPage parsingPostsOnWebPage,WriteToCSV writeToCSV ) {
+		Logger.getLogger(Crawler.class).debug("Process page "+ Url+ "\n");
+		if(verifyUrl(Url, keyWordsInURL,exclusionKeyWords )!=null){
+			if (!OutputParams.searchUrlInSuccedUrlsFile(Url)) { 
+				Logger.getLogger(Crawler.class).debug(Url);
+				parsingPostsOnWebPage.processData(Url,writeToCSV,0);
+				Elements links =getUrlsOnPage(Url,0);
+				if(links!=null){
+					for(Element link: links){	
+						processPage(link.attr("abs:href"), keyWordsInURL,exclusionKeyWords, parsingPostsOnWebPage, writeToCSV);
 					}
-				} catch (IOException e) {
-					listURLs.remove(Url);
-					Logger.getLogger(Crawler.class).debug("Exception :"+e.getMessage() + " Description :"+ e.toString());
-
 				}
+
 			}
 		}
 
 	}
 
 
-	private static String verifyUrl(String url) {
+	/**
+	 * Parse URLS in WebPages.
+	 * @param parsingPostsOnWebPage
+	 * @param writeToCSV
+	 */
+	public static void processPage(String urlsFileName, ParsingPostsOnWebPage parsingPostsOnWebPage,WriteToCSV writeToCSV ) {
+
+		try {
+			FileInputStream fis = new FileInputStream(new File(urlsFileName));
+
+			BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+
+			String line = null;
+			while ((line = br.readLine()) != null) {
+				Logger.getLogger(Crawler.class).debug(line);
+				parsingPostsOnWebPage.processData(line,writeToCSV,0);
+			}
+			br.close();
+
+		} catch (IOException e) {
+			Logger.getLogger(Crawler.class).debug("Exception :" + e.getMessage());	
+
+		}	
+	}
+
+
+	private  static Elements getUrlsOnPage(String url, int howTimes){
+		Elements links =null;
+		try {
+			Document doc;
+			doc = Jsoup.connect(url).userAgent("Mozilla").get();
+			if(doc!=null){
+				Element elt = doc.body();
+				if(elt!=null){		
+					links =elt.select("a[href]");
+				}
+			}
+		} catch (SocketTimeoutException a) {
+			//try three times the same URL if timeoutexecption
+			if (howTimes+1==3){
+				OutputParams.appendToFailedUrlsFile(url);
+				Logger.getLogger(InitParser.class).debug("Can't process this URL :" + url +" Content, cause time out exception");	
+			} else {
+				getUrlsOnPage(url, howTimes+1);
+			}
+		} catch (IOException e) {
+			Logger.getLogger(Crawler.class).debug("Exception :"+e.getMessage() + " Description :"+ e.toString());
+		}
+		return links;
+	}
+
+
+
+
+
+	private static String verifyUrl(String url, ArrayList<String> keyWordsInURL,ArrayList<String> exclusionKeyWords) {
 
 		if (!url.toLowerCase().startsWith("http")) {
 			return null;
@@ -88,20 +128,105 @@ public class Crawler {
 			new URL(url);
 		} 
 		catch (MalformedURLException e) {
+			Logger.getLogger(Crawler.class).debug("Exception :"+e.getMessage() + " Description :"+ e.toString());
 			return null;
 		}
 
+		for(int i=0; i<keyWordsInURL.size(); i++){
+			if(!url.toLowerCase().contains(keyWordsInURL.get(i).toLowerCase())){
+				return null;
+			}
+		}
+
+		for(int i=0; i<exclusionKeyWords.size(); i++){
+			if(!url.toLowerCase().contains(exclusionKeyWords.get(i).toLowerCase())){
+				return null;
+			}
+		}
 		return url;
 	}
 
-	public static ArrayList<String> getURLsLists (){
-		@SuppressWarnings("rawtypes")
-		Iterator it = listURLs.iterator();
-		ArrayList<String> linksList = new ArrayList<String>();
-		while (it.hasNext()){
-			linksList.add((String) it.next());
+
+
+
+
+	public static void processPageByPagination(String url, ArrayList<String> keyWordsPagination,
+			ArrayList<String> exclusionKeyWords, ParsingPostsOnWebPage parsingPostsOnWebPage, WriteToCSV writeToCSV) {
+		Logger.getLogger(Crawler.class).debug("Process page by pagination "+ url+ "\n");
+		if(verifyUrlPagination(url, exclusionKeyWords )!=null){
+			if (!OutputParams.searchUrlInSuccedUrlsFile(url)) { 
+				Logger.getLogger(Crawler.class).debug(url);
+				parsingPostsOnWebPage.processData(url,writeToCSV,0);
+				Elements links =getUrlsOnPagePagination(url,keyWordsPagination,0);
+				if(links!=null){
+					for(Element link: links){	
+						processPageByPagination(link.attr("abs:href"),keyWordsPagination ,exclusionKeyWords,  parsingPostsOnWebPage, writeToCSV);
+					}
+				}
+
+			}
 		}
-		return linksList;
 
 	}
+
+
+	private static Elements getUrlsOnPagePagination(String url,
+			ArrayList<String> keyWordsPagination, int howTimes) {
+		Elements links =null;
+		Elements links1 = new Elements();
+		Elements links2 = new Elements();
+		try {
+			Document doc;
+			doc = Jsoup.connect(url).userAgent("Mozilla").get();
+			if(doc!=null){
+				Element elt = doc.body();
+				if(elt!=null){	
+					if(!url.contains(keyWordsPagination.get(2))){
+						links1 =elt.select("a[abs:href*="+keyWordsPagination.get(0)+"]");
+					} 
+					links2 =elt.select("a[abs:href*="+keyWordsPagination.get(2)+"]");
+					links = new Elements();
+					for(int i=0; i<links1.size(); i++){
+						links.add(links1.get(i));
+					}
+					for(int i=0; i<links2.size(); i++){
+						links.add(links2.get(i));
+					}
+				}
+			}
+		} catch (SocketTimeoutException a) {
+			//try three times the same URL if timeoutexecption
+			if (howTimes+1==3){
+				OutputParams.appendToFailedUrlsFile(url);
+				Logger.getLogger(Crawler.class).debug("Can't process this URL :" + url +" Content, cause time out exception");	
+			} else {
+				getUrlsOnPagePagination(url, keyWordsPagination, howTimes+1);
+			}
+		} catch (IOException e) {
+			Logger.getLogger(Crawler.class).debug("Exception :"+e.getMessage() + " Description :"+ e.toString());
+		}
+		return links;
+	}
+
+
+	private static String  verifyUrlPagination(String url,ArrayList<String> exclusionKeyWords) {
+
+		if (!url.toLowerCase().startsWith("http")) {
+			return null;
+		}
+		try {
+			new URL(url);
+		} 
+		catch (MalformedURLException e) {
+			Logger.getLogger(Crawler.class).debug("Exception :"+e.getMessage() + " Description :"+ e.toString());
+			return null;
+		}
+		for(int i=0; i<exclusionKeyWords.size(); i++) {
+			if(url.contains(exclusionKeyWords.get(i))){
+				return null;
+			}
+		}
+		return url;
+	}
+
 }

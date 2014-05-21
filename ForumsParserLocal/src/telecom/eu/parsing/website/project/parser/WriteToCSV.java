@@ -56,7 +56,7 @@ public class WriteToCSV {
 			writer.append("\""+ date+ "\"");
 			writer.append(",");
 			writer.append("\""+ message+"\"");
-			writer.append('\n');
+			writer.append("\n");
 			writer.flush();
 			writer.close();
 			Logger.getLogger(this.getClass() ).debug("\n Write to csv  : "+ id +","+ author+","+date+","+message+"\n");

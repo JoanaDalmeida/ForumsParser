@@ -16,7 +16,7 @@
  * limitations under the License.
  * 
  * ------------------------------------------------------------------
- * File Name   : ReadXMLFile.java
+ * File Name   : ReadConfigFile.java
  *
  * Created     : 18/03/2014
  * 
@@ -32,6 +32,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -63,13 +64,19 @@ public class ReadConfigFile {
 				params.add(nList.item(i).getTextContent());
 			}
 		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
+			Logger.getLogger(ReadConfigFile.class).debug("EXCEPTION while reading parameters : "+ e.getMessage()+
+					" Description : "+ e.toString());
 		} catch (SAXException | IOException e) {
-			e.printStackTrace();
+			Logger.getLogger(ReadConfigFile.class).debug("EXCEPTION while reading parameters : "+ e.getMessage()+
+					" Description : "+ e.toString());
 		}
-		if (!paramName.equalsIgnoreCase("keyWordsInURL")){
+		if ((!paramName.equalsIgnoreCase("keyWordsInURL")) && (!paramName.equalsIgnoreCase("exclusionKeyWords"))){
 			if(params.size()>0){
-				return params.get(0);
+				if(params.get(0).length()>0){
+					return params.get(0);
+				}else{
+					return null;
+				}
 			} else {
 				return null;
 			}

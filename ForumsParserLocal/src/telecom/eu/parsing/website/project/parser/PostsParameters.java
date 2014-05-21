@@ -24,6 +24,12 @@
  */
 package telecom.eu.parsing.website.project.parser;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
+import org.apache.log4j.Logger;
+
 public class PostsParameters {
 	private static String postContainerClass;
 	private static String messageContainerClass;
@@ -141,4 +147,83 @@ public class PostsParameters {
 		PostsParameters.allPostsContainerTag = allPostsContainerTag;
 	}
 
+	public static void saveParamsToFile(String fileName){
+		File input =new File(fileName);
+		if( !fileName.substring(fileName.indexOf(".")+1).equalsIgnoreCase("xml")){
+			String newFilName = fileName.substring(0, fileName.indexOf(".")+1)+"xml";
+			input= new File(newFilName);
+		}
+		if (!input.exists()) {
+			try {
+				input.createNewFile();
+			} catch (IOException e) {
+				Logger.getLogger(PostsParameters.class ).debug("Execption while creating Params file : "+ e.getMessage());
+				return;
+			}
+		}
+		try {
+			FileWriter writer = new FileWriter(fileName);
+			writer.append("<?xml version="+ "\""+"1.0"+"\""+ " encoding="+ "\""+"ISO-8859-1"+ "\""+"?>");
+			writer.append("\n");
+			
+			writer.append("<postsParameters>");
+			writer.append("\n");
+			
+			writer.append("<allPostsContainerTag>");
+			writer.append(PostsParameters.getAllPostsContainerTag());
+			writer.append("</allPostsContainerTag>");
+			writer.append("\n");
+			
+			writer.append("<allPostsContainerClass>");
+			writer.append(PostsParameters.getAllPostsContainerClass());
+			writer.append("</allPostsContainerClass>");
+			writer.append("\n");
+			
+			writer.append("<postContainerTag>");
+			writer.append(PostsParameters.getPostContainerTag());
+			writer.append("</postContainerTag>");
+			writer.append("\n");
+			
+			writer.append("<postContainerClass>");
+			writer.append(PostsParameters.getPostContainerClass());
+			writer.append("</postContainerClass>");
+			writer.append("\n");
+			
+			writer.append("<dateContainerTag>");
+			writer.append(PostsParameters.getDateContainerTag());
+			writer.append("</dateContainerTag>");
+			writer.append("\n");
+			
+			writer.append("<dateContainerClass>");
+			writer.append(PostsParameters.getDateContainerClass());
+			writer.append("</dateContainerClass>");
+			writer.append("\n");	
+			
+			writer.append("<authorContainerTag>");
+			writer.append(PostsParameters.getAuthorContainerTag());
+			writer.append("</authorContainerTag>");
+			writer.append("\n");
+			
+			writer.append("<authorContainerClass>");
+			writer.append(PostsParameters.getAuthorContainerClass());
+			writer.append("</authorContainerClass>");
+			writer.append("\n");
+			
+			writer.append("<messageContainerTag>");
+			writer.append(PostsParameters.getMessageContainerTag());
+			writer.append("</messageContainerTag>");
+			writer.append("\n");
+			
+			writer.append("<messageContainerClass>");
+			writer.append(PostsParameters.getMessageContainerClass());
+			writer.append("</messageContainerClass>");
+			writer.append("\n");
+			
+			writer.append("</postsParameters>");
+			writer.flush();
+			writer.close();
+		} catch (IOException e) {
+			Logger.getLogger(PostsParameters.class ).debug("Execption while writing in params file : "+ e.getMessage());
+		}
+	}
 }

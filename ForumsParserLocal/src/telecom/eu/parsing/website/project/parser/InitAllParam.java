@@ -32,11 +32,11 @@ import org.jsoup.nodes.Element;
 public class InitAllParam {
 
 
-	public static void initPostParam(Document doc,String date, String author, String message, boolean isPostIdExists){
+	public static void initPostParam(Document doc,String date, String author, String message){
 		ParsingPostsOnWebPage webParser = new ParsingPostsOnWebPage();
 		Element body = doc.body();
 		if(body!=null) {
-			webParser.setPostsParameters(body, date, message, author, isPostIdExists);
+			webParser.setPostsParameters(body, date, message, author);
 		} else {
 			Logger.getLogger(InitAllParam.class).debug("*****************Connexion Error ******************\n");
 			return;
