@@ -11,12 +11,65 @@
 	<isPostIdExist></isPostIdExist>
 </postSample>
 
+
+
+<!--true or false, true if you want to use parameters File to init posts params else put false-->
+<useParametersFile></useParametersFile>
+
+<!--Posts Parameters File as input-->
+<postsParamsInput></postsParamsInput>
+
+
+
+<!--true or false, true if you want to parse URLS in a giving File-->
+<useUrlsInFile></useUrlsInFile>
+
+<!--path to File that contains URLs to parse-->
+<urlsFileName></urlsFileName>
+
+
+
+
 <!--path of the file in which the program saves all posts-->
-<pathToPostsFile></pathToPostsFile>
+<postsFileName></postsFileName>
+
+<!--path of the file in which the program saves posts's Parameters-->
+<postsParamsFileName></postsParamsFileName>
+
+<!--path of the file in which the program saves failed Urls-->
+<failedUrlsFileName></failedUrlsFileName>
+
+<!--path of the file in which the program saves URLs that it parses-->
+<succedUrlsFileName></succedUrlsFileName>
+
+
 
 <!--The url of the forum to parse -->
-<forumToparseURL></forumToparseURL>
+<forumToParseURL></forumToParseURL>
 
-<!--keywords that the program checks in a page url before parsing it and extract all posts, you can add many keywords-->
+<!--keywords that the page url must contain, you can add many keywords-->
 <keyWordsInURL></keyWordsInURL>
+
+<!--keywords that the page url doesn't contain, you can add many exclusion keywords-->
+<exclusionKeyWords></exclusionKeyWords>
+
+
+<!-- Second to crawls the website-->
+<PaginationMethod>
+<!--true or false, true if you want to use pagination to parse website-->
+<usePagination>true</usePagination>
+
+<!-- the first page of discussion Lists-->
+<dicussionsListPageURLStartWith></dicussionsListPageURLStartWith>
+<!-- Specify what change from one discussion Lists Page to another-->
+<dicussionListPagination></dicussionListPagination>
+
+<!-- the first page of posts Lists of discussion-->
+<postsListPageStartWith></postsListPageStartWith>
+<!-- Specify what change from one posts Lists Page to another-->
+<postsListPagination></postsListPagination>
+
+</PaginationMethod>
+
+
 </parameters>
