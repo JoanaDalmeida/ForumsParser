@@ -14,4 +14,26 @@
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>jar/jsoup-1.7.3-javadoc.jar</name>
+			<type>1</type>
+			<location>C:/Users/AissataJo/Desktop/ProjetMineur/Libraries/Jsoup/jsoup-1.7.3-javadoc.jar</location>
+		</link>
+		<link>
+			<name>jar/jsoup-1.7.3-sources.jar</name>
+			<type>1</type>
+			<location>C:/Users/AissataJo/Desktop/ProjetMineur/Libraries/Jsoup/jsoup-1.7.3-sources.jar</location>
+		</link>
+		<link>
+			<name>jar/jsoup-1.7.3.jar</name>
+			<type>1</type>
+			<location>C:/Users/AissataJo/Desktop/ProjetMineur/Libraries/Jsoup/jsoup-1.7.3.jar</location>
+		</link>
+		<link>
+			<name>jar/log4j-1.2.17.jar</name>
+			<type>1</type>
+			<location>C:/Users/AissataJo/Desktop/ProjetMineur/Libraries/Log4j/apache-log4j-1.2.17/log4j-1.2.17.jar</location>
+		</link>
+	</linkedResources>
 </projectDescription>
