@@ -2,11 +2,11 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
-	<classpathentry exported="true" kind="lib" path="jar/jsoup-1.7.3.jar" sourcepath="jar/jsoup-1.7.3-sources.jar">
+	<classpathentry exported="true" kind="lib" path="C:/Users/AissataJo/Desktop/ProjetMineur/Libraries/Jsoup/jsoup-1.7.3.jar" sourcepath="C:/Users/AissataJo/Desktop/ProjetMineur/Libraries/Jsoup/jsoup-1.7.3-sources.jar">
 		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/ForumsDiscussionsParser/jar/jsoup-1.7.3-javadoc.jar!/"/>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/AissataJo/Desktop/ProjetMineur/Libraries/Jsoup/jsoup-1.7.3-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry exported="true" kind="lib" path="jar/log4j-1.2.17.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/AissataJo/Desktop/ProjetMineur/Libraries/Log4j/apache-log4j-1.2.17/log4j-1.2.17.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

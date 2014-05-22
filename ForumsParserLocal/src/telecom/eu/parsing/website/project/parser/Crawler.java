@@ -51,7 +51,7 @@ public class Crawler {
 			if (!OutputParams.searchUrlInSuccedUrlsFile(Url)) { 
 				Logger.getLogger(Crawler.class).debug(Url);
 				parsingPostsOnWebPage.processData(Url,writeToCSV,0);
-				Elements links =getUrlsOnPage(Url,0);
+				Elements links =getUrlsOnPage(Url,keyWordsInURL, 0);
 				if(links!=null){
 					for(Element link: links){	
 						processPage(link.attr("abs:href"), keyWordsInURL,exclusionKeyWords, parsingPostsOnWebPage, writeToCSV);
@@ -90,15 +90,23 @@ public class Crawler {
 	}
 
 
-	private  static Elements getUrlsOnPage(String url, int howTimes){
+	private  static Elements getUrlsOnPage(String url, ArrayList<String> keyWordsInURL, int howTimes){
 		Elements links =null;
 		try {
 			Document doc;
 			doc = Jsoup.connect(url).userAgent("Mozilla").get();
 			if(doc!=null){
 				Element elt = doc.body();
-				if(elt!=null){		
-					links =elt.select("a[href]");
+				if(elt!=null){	
+					links = new Elements();
+					for(int i=0; i<keyWordsInURL.size();i++){
+						Elements elements = elt.select("a[abs:href*="+keyWordsInURL.get(2)+"]");
+						links = new Elements();
+						for(int j=0; j<elements.size(); i++){
+							links.add(elements.get(j));
+						}
+					}
+					///links =elt.select("a[href]");
 				}
 			}
 		} catch (SocketTimeoutException a) {
@@ -107,7 +115,7 @@ public class Crawler {
 				OutputParams.appendToFailedUrlsFile(url);
 				Logger.getLogger(InitParser.class).debug("Can't process this URL :" + url +" Content, cause time out exception");	
 			} else {
-				getUrlsOnPage(url, howTimes+1);
+				getUrlsOnPage(url, keyWordsInURL, howTimes+1);
 			}
 		} catch (IOException e) {
 			Logger.getLogger(Crawler.class).debug("Exception :"+e.getMessage() + " Description :"+ e.toString());
@@ -139,7 +147,7 @@ public class Crawler {
 		}
 
 		for(int i=0; i<exclusionKeyWords.size(); i++){
-			if(!url.toLowerCase().contains(exclusionKeyWords.get(i).toLowerCase())){
+			if(url.toLowerCase().contains(exclusionKeyWords.get(i).toLowerCase())){
 				return null;
 			}
 		}
