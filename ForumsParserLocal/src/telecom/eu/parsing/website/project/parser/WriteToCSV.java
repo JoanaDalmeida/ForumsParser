@@ -33,7 +33,8 @@ import org.apache.log4j.Logger;
 
 public class WriteToCSV {
 	private static String fileName;
-	public WriteToCSV(String fileName){
+	private static String delimiter;
+	public WriteToCSV(String fileName,String delimiterOfPostsFile){
 		File input =new File(fileName);
 		if (!input.exists()) {
 			try {
@@ -43,19 +44,22 @@ public class WriteToCSV {
 			}
 		}
 		WriteToCSV.fileName=fileName;
-		WritePostToCSVFile("id", "author", "date","message");
+		WriteToCSV.delimiter=delimiterOfPostsFile;
+		WritePostToCSVFile("id", "author", "date","message","URL");
 	}
 
-	public void WritePostToCSVFile(String id, String author, String date, String message) {
+	public void WritePostToCSVFile(String id, String author, String date, String message, String URL) {
 		try {
 			FileWriter writer = new FileWriter(fileName,true);
 			writer.append( "\"" +id +  "\"" );
-			writer.append(',');
+			writer.append(WriteToCSV.delimiter);
 			writer.append("\""+ author+"\"");
-			writer.append(",");
+			writer.append(WriteToCSV.delimiter);
 			writer.append("\""+ date+ "\"");
-			writer.append(",");
+			writer.append(WriteToCSV.delimiter);
 			writer.append("\""+ message+"\"");
+			writer.append(WriteToCSV.delimiter);
+			writer.append("\""+ URL+"\"");
 			writer.append("\n");
 			writer.flush();
 			writer.close();
@@ -66,10 +70,11 @@ public class WriteToCSV {
 
 	}
 	
-	public void WritePostToCSVFile(ArrayList<String> ids, ArrayList<String> authors, ArrayList<String> dates, ArrayList<String> messages) {
+	public void WritePostToCSVFile(ArrayList<String> ids, ArrayList<String> authors, ArrayList<String> dates, 
+			ArrayList<String> messages, String URL) {
 		if(ids.size()==authors.size() && ids.size()==dates.size() && ids.size()==messages.size()){
 			for(int i = 0; i<ids.size(); i++){
-				WritePostToCSVFile(ids.get(i), authors.get(i), dates.get(i), messages.get(i));
+				WritePostToCSVFile(ids.get(i), authors.get(i), dates.get(i), messages.get(i), URL);
 			}
 		}
 

@@ -132,6 +132,12 @@ public class LaunchWebParsing {
 
 
 
+		// Delimiter of the CSV file in which the program saves all posts
+		String delimiterOfPostsFile =(String) readConfigFile.readParamInXmlFile("DelimiterOfPostsFile");
+		if(delimiterOfPostsFile==null) {
+			Logger.getLogger(LaunchWebParsing.class).debug("the param delimiterOfPostsFile is not set");
+		}
+
 		// File where post will be store
 		String postsFileName =(String) readConfigFile.readParamInXmlFile("postsFileName");
 		if(postsFileName==null) {
@@ -175,8 +181,8 @@ public class LaunchWebParsing {
 				succedUrlsFileName=null;
 			}
 		}
-		
-		
+
+
 		boolean usePagination = false;
 		ArrayList<String> keyWordsPagination = new ArrayList<String>();
 		String usePaginationStringValue = (String) readConfigFile.readParamInXmlFile("usePagination");
@@ -189,19 +195,19 @@ public class LaunchWebParsing {
 						Logger.getLogger(LaunchWebParsing.class).debug("the param dicussionsListPageURLStartWith is not set. You must specify it, Initialisation Failed.");
 						return;
 					}
-					
+
 					String dicussionListPagination = (String) readConfigFile.readParamInXmlFile("dicussionListPagination");
 					if(dicussionListPagination==null) {
 						Logger.getLogger(LaunchWebParsing.class).debug("the param dicussionListPagination is not set. You must specify it, Initialisation Failed.");
 						return;
 					}
-					
+
 					String postsListPageStartWith = (String) readConfigFile.readParamInXmlFile("postsListPageStartWith");
 					if(postsListPageStartWith==null) {
 						Logger.getLogger(LaunchWebParsing.class).debug("the param postsListPageStartWith is not set. You must specify it, Initialisation Failed.");
 						return;
 					}
-					
+
 					String postsListPagination = (String) readConfigFile.readParamInXmlFile("postsListPagination");
 					if(postsListPagination==null) {
 						Logger.getLogger(LaunchWebParsing.class).debug("the param postsListPagination is not set. You must specify it, Initialisation Failed.");
@@ -222,13 +228,13 @@ public class LaunchWebParsing {
 		if(useParametersFile) {
 			if(useUrlsInFile){
 				if((StartpageUrl == null) || (postsParamsInput==null) || (urlsFileName == null) || (postsFileName==null) ||
-						(postsParamsFileName==null) || (failedUrlsFileName==null) || (succedUrlsFileName==null) ){
+						(postsParamsFileName==null) || (failedUrlsFileName==null) || (succedUrlsFileName==null) || (delimiterOfPostsFile==null)){
 					Logger.getLogger(LaunchWebParsing.class).debug("Error : At least one of the params is not set or is not correct.");
 					return;
 				} 
 			} else {
 				if((StartpageUrl==null) || (postsParamsInput==null) || (postsFileName==null) || (postsParamsFileName==null) 
-						|| (failedUrlsFileName==null) || (succedUrlsFileName==null)){
+						|| (failedUrlsFileName==null) || (succedUrlsFileName==null) || (delimiterOfPostsFile==null)){
 					Logger.getLogger(LaunchWebParsing.class).debug("Error : At least one of the params is not set or is not correct.");
 					return;
 				}
@@ -237,14 +243,14 @@ public class LaunchWebParsing {
 			if(useUrlsInFile){
 				if((urlsFileName==null) || (pageUrlForExample==null) || (StartpageUrl==null) || (date==null) ||
 						(author==null) || (message==null) || (postsFileName==null) || (postsParamsFileName==null)
-						|| (failedUrlsFileName==null) || (succedUrlsFileName==null)){
+						|| (failedUrlsFileName==null) || (succedUrlsFileName==null) || (delimiterOfPostsFile==null)){
 					Logger.getLogger(LaunchWebParsing.class).debug("Error : At least one of the params is not set or is not correct.");
 					return;
 				}
 			} else {
 				if((pageUrlForExample==null) || (StartpageUrl==null) || (date==null) || (author==null) ||
 						(message==null) || (postsFileName==null) || (postsParamsFileName==null)
-						|| (failedUrlsFileName==null) || (succedUrlsFileName==null) ){
+						|| (failedUrlsFileName==null) || (succedUrlsFileName==null) || (delimiterOfPostsFile==null) ){
 					Logger.getLogger(LaunchWebParsing.class).debug("Error : At least one of the params is not set or is not correct.");
 					return;
 				}
@@ -254,7 +260,7 @@ public class LaunchWebParsing {
 
 		InitParser.startParser(pageUrlForExample,StartpageUrl, date, author, message, 
 				useParametersFile, postsParamsInput, useUrlsInFile, urlsFileName,
-				postsFileName, postsParamsFileName, failedUrlsFileName, succedUrlsFileName,
+				delimiterOfPostsFile,postsFileName, postsParamsFileName, failedUrlsFileName, succedUrlsFileName,
 				keyWordsInURL, exclusionKeyWords, usePagination, keyWordsPagination );
 
 	}

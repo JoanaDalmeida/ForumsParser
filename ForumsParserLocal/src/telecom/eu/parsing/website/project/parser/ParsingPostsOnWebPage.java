@@ -327,7 +327,9 @@ public class ParsingPostsOnWebPage {
 				}
 
 				if (elementMessage!=null){
-					textMessage = Jsoup.parse(elementMessage.toString().replaceAll("\\<.*?>","")).text();
+					textMessage = elementMessage.toString();
+					//to get just the text content
+					//Jsoup.parse(elementMessage.toString().replaceAll("\\<.*?>","")).text();
 				}
 
 				if (elementAuthor!=null){
@@ -379,7 +381,7 @@ public class ParsingPostsOnWebPage {
 			return;
 		} 
 
-		writeToCSV.WritePostToCSVFile(ids, authors, dates, messages);
+		writeToCSV.WritePostToCSVFile(ids, authors, dates, messages, link);
 
 		OutputParams.appendToSuccedUrlsFile(link);
 	}

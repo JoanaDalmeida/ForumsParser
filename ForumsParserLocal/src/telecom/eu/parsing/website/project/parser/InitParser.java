@@ -37,7 +37,7 @@ public class InitParser {
 
 	public static void startParser(String StartPageUrl,String HomeURL, String date, String author,  String message, 
 			boolean useParametersFile, String postsParamsInput, boolean useUrlsInFile, String urlsFileName,
-			String postsFileName,String paramsfileName,String failedUrlsFileName,String succedUrlsFileName,
+			String delimiterOfPostsFile, String postsFileName,String paramsfileName,String failedUrlsFileName,String succedUrlsFileName,
 			ArrayList<String> keyWordsInURL, ArrayList<String> exclusionKeyWords,
 			boolean usePagination, ArrayList<String> keyWordsPagination){
 
@@ -72,7 +72,7 @@ public class InitParser {
 		////start parsing 
 		if (initParamsOk){
 			/*the csv file that will contain all posts*/
-			WriteToCSV writeToCSV = new WriteToCSV(postsFileName);
+			WriteToCSV writeToCSV = new WriteToCSV(postsFileName, delimiterOfPostsFile);
 			OutputParams.setOutputParams(failedUrlsFileName, succedUrlsFileName, postsFileName, paramsfileName);
 
 			Logger.getLogger(InitParser.class).debug("****************Start parsing***********");
