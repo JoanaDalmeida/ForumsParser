@@ -44,17 +44,19 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public class Crawler {
-	public static void processPage(String Url, ArrayList<String> keyWordsInURL,ArrayList<String> exclusionKeyWords,
-			ParsingPostsOnWebPage parsingPostsOnWebPage,WriteToCSV writeToCSV ) {
+	public static void processPage(String Url, String UrlText, ArrayList<String> keyWordsInURL,
+			ArrayList<String> exclusionKeyWords, ParsingPostsOnWebPage parsingPostsOnWebPage, 
+			WriteToCsvPostsFile writeToCSV ) {
 		Logger.getLogger(Crawler.class).debug("Process page "+ Url+ "\n");
 		if(verifyUrl(Url, keyWordsInURL,exclusionKeyWords )!=null){
 			if (!OutputParams.searchUrlInSuccedUrlsFile(Url)) { 
 				Logger.getLogger(Crawler.class).debug(Url);
-				parsingPostsOnWebPage.processData(Url,writeToCSV,0);
+				parsingPostsOnWebPage.processData(Url, UrlText, writeToCSV,0);
 				Elements links =getUrlsOnPage(Url,keyWordsInURL, 0);
 				if(links!=null){
 					for(Element link: links){	
-						processPage(link.attr("abs:href"), keyWordsInURL,exclusionKeyWords, parsingPostsOnWebPage, writeToCSV);
+						processPage(link.attr("abs:href"), link.text(), keyWordsInURL,exclusionKeyWords, parsingPostsOnWebPage, 
+								writeToCSV);
 					}
 				}
 
@@ -69,20 +71,17 @@ public class Crawler {
 	 * @param parsingPostsOnWebPage
 	 * @param writeToCSV
 	 */
-	public static void processPage(String urlsFileName, ParsingPostsOnWebPage parsingPostsOnWebPage,WriteToCSV writeToCSV ) {
-
+	public static void processPage(String urlsFileName, ParsingPostsOnWebPage parsingPostsOnWebPage, 
+			WriteToCsvPostsFile writeToCSV ) {
 		try {
 			FileInputStream fis = new FileInputStream(new File(urlsFileName));
-
 			BufferedReader br = new BufferedReader(new InputStreamReader(fis));
-
 			String line = null;
 			while ((line = br.readLine()) != null) {
 				Logger.getLogger(Crawler.class).debug(line);
-				parsingPostsOnWebPage.processData(line,writeToCSV,0);
+				parsingPostsOnWebPage.processData(line,"", writeToCSV,0);
 			}
 			br.close();
-
 		} catch (IOException e) {
 			Logger.getLogger(Crawler.class).debug("Exception :" + e.getMessage());	
 
@@ -128,7 +127,6 @@ public class Crawler {
 
 
 	private static String verifyUrl(String url, ArrayList<String> keyWordsInURL,ArrayList<String> exclusionKeyWords) {
-
 		if (!url.toLowerCase().startsWith("http")) {
 			return null;
 		}
@@ -156,19 +154,30 @@ public class Crawler {
 
 
 
-
-
-	public static void processPageByPagination(String url, ArrayList<String> keyWordsPagination,
-			ArrayList<String> exclusionKeyWords, ParsingPostsOnWebPage parsingPostsOnWebPage, WriteToCSV writeToCSV) {
+	public static void processPageByPagination(String url, String UrlText, 
+			boolean ParentUrlContainDiscussionLits, ArrayList<String> exclusionKeyWords, 
+			ParsingPostsOnWebPage parsingPostsOnWebPage, WriteToCsvPostsFile writeToPostCSVFile) {
 		Logger.getLogger(Crawler.class).debug("Process page by pagination "+ url+ "\n");
+		boolean doesParentUrlContainDiscussionLits=false;
+		
 		if(verifyUrlPagination(url, exclusionKeyWords )!=null){
+			if(ParentUrlContainDiscussionLits){
+				if(!url.contains(PaginationParameters.getDiscussionsUrlStart()))
+				OutputParams.getWriteToCsvDiscussionsFile().writeDiscussionsToCSVFile1(url, UrlText);
+			}
 			if (!OutputParams.searchUrlInSuccedUrlsFile(url)) { 
 				Logger.getLogger(Crawler.class).debug(url);
-				parsingPostsOnWebPage.processData(url,writeToCSV,0);
-				Elements links =getUrlsOnPagePagination(url,keyWordsPagination,0);
+				parsingPostsOnWebPage.processData(url, UrlText, writeToPostCSVFile,0);
+				if(url.contains(PaginationParameters.getDiscussionsUrlStart()) &&
+						url.contains(PaginationParameters.getDiscussionsUrlEnd())){
+					doesParentUrlContainDiscussionLits=true;
+				}
+				Elements links =getUrlsOnPagePagination(url, 0);
 				if(links!=null){
 					for(Element link: links){	
-						processPageByPagination(link.attr("abs:href"),keyWordsPagination ,exclusionKeyWords,  parsingPostsOnWebPage, writeToCSV);
+						processPageByPagination(link.attr("abs:href"), link.text(), doesParentUrlContainDiscussionLits,
+								exclusionKeyWords,  parsingPostsOnWebPage, 
+								writeToPostCSVFile);
 					}
 				}
 
@@ -178,8 +187,7 @@ public class Crawler {
 	}
 
 
-	private static Elements getUrlsOnPagePagination(String url,
-			ArrayList<String> keyWordsPagination, int howTimes) {
+	private static Elements getUrlsOnPagePagination(String url,int howTimes) {
 		Elements links =null;
 		Elements links1 = new Elements();
 		Elements links2 = new Elements();
@@ -189,16 +197,28 @@ public class Crawler {
 			if(doc!=null){
 				Element elt = doc.body();
 				if(elt!=null){	
-					if(!url.contains(keyWordsPagination.get(2))){
-						links1 =elt.select("a[abs:href*="+keyWordsPagination.get(0)+"]");
-					} 
-					links2 =elt.select("a[abs:href*="+keyWordsPagination.get(2)+"]");
+					links1 =elt.select("a[abs:href~="+PaginationParameters.getDiscussionsUrlRegex()+"]");
+					links2 =elt.select("a[abs:href*="+PaginationParameters.getPostsUrlStart()+"]");
+
 					links = new Elements();
 					for(int i=0; i<links1.size(); i++){
-						links.add(links1.get(i));
+						if(!isUrlInPosts(elt, links1.get(i).attr("href"))) {
+							links.add(links1.get(i));
+						}
 					}
+
 					for(int i=0; i<links2.size(); i++){
-						links.add(links2.get(i));
+						if(!isUrlInPosts(elt, links2.get(i).attr("href"))) {
+							int j=0;
+							for(; j<links.size(); j++){
+								if((links.get(j).attr("href")).equalsIgnoreCase(links2.get(i).attr("href"))){
+									break;
+								}
+							} 
+							if(j==links.size()){
+								links.add(links2.get(i));
+							}
+						}
 					}
 				}
 			}
@@ -208,7 +228,7 @@ public class Crawler {
 				OutputParams.appendToFailedUrlsFile(url);
 				Logger.getLogger(Crawler.class).debug("Can't process this URL :" + url +" Content, cause time out exception");	
 			} else {
-				getUrlsOnPagePagination(url, keyWordsPagination, howTimes+1);
+				getUrlsOnPagePagination(url, howTimes+1);
 			}
 		} catch (IOException e) {
 			Logger.getLogger(Crawler.class).debug("Exception :"+e.getMessage() + " Description :"+ e.toString());
@@ -218,7 +238,6 @@ public class Crawler {
 
 
 	private static String  verifyUrlPagination(String url,ArrayList<String> exclusionKeyWords) {
-
 		if (!url.toLowerCase().startsWith("http")) {
 			return null;
 		}
@@ -235,6 +254,24 @@ public class Crawler {
 			}
 		}
 		return url;
+	}
+
+	private static boolean isUrlInPosts(Element elt, String url){
+		Elements elementsPosts = elt.select(PostsParameters.getPostContainerTag()+"."+PostsParameters.getPostContainerClass());
+		for (int j=0; j<elementsPosts.size(); j++ ){
+			Element elementPost = elementsPosts.get(j);
+			Element elementMessage = null;
+			if (elementPost.select(PostsParameters.getMessageContainerTag()+"."+PostsParameters.getMessageContainerClass()).size()>0) {
+				elementMessage = elementPost.select(PostsParameters.getMessageContainerTag()+"."
+						+PostsParameters.getMessageContainerClass()).first();
+			}
+			if (elementMessage!=null){
+				if (elementMessage.toString().contains(url)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 }

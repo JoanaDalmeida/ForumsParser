@@ -37,7 +37,7 @@ public class InitParser {
 
 	public static void startParser(String StartPageUrl,String HomeURL, String date, String author,  String message, 
 			boolean useParametersFile, String postsParamsInput, boolean useUrlsInFile, String urlsFileName,
-			String delimiterOfPostsFile, String postsFileName,String paramsfileName,String failedUrlsFileName,String succedUrlsFileName,
+			String delimiterOfPostsFile, String postsFileName, String discussionsFileName, String paramsfileName,String failedUrlsFileName,String succedUrlsFileName,
 			ArrayList<String> keyWordsInURL, ArrayList<String> exclusionKeyWords,
 			boolean usePagination, ArrayList<String> keyWordsPagination){
 
@@ -72,22 +72,29 @@ public class InitParser {
 		////start parsing 
 		if (initParamsOk){
 			/*the csv file that will contain all posts*/
-			WriteToCSV writeToCSV = new WriteToCSV(postsFileName, delimiterOfPostsFile);
-			OutputParams.setOutputParams(failedUrlsFileName, succedUrlsFileName, postsFileName, paramsfileName);
+			WriteToCsvPostsFile writeToPostCSVFile = new WriteToCsvPostsFile(postsFileName, delimiterOfPostsFile);
+			
+			// Csv file that contains discussions list
+			WriteToCsvDiscussionsFile writeToCsvDiscussionsFile = new WriteToCsvDiscussionsFile(discussionsFileName, delimiterOfPostsFile);
+			
+			OutputParams.setOutputParams(failedUrlsFileName, succedUrlsFileName, postsFileName, paramsfileName, writeToCsvDiscussionsFile);
 
 			Logger.getLogger(InitParser.class).debug("****************Start parsing***********");
 			ParsingPostsOnWebPage parsingPostsOnWebPage =  new ParsingPostsOnWebPage();
 			if(usePagination){
+				//set pagination parameters
+				PaginationParameters.setParameters(keyWordsPagination);
 				if(!useUrlsInFile){
-					Crawler.processPageByPagination(HomeURL,keyWordsPagination, exclusionKeyWords, parsingPostsOnWebPage, writeToCSV);
+					Crawler.processPageByPagination(HomeURL,"",false, exclusionKeyWords, parsingPostsOnWebPage, 
+							writeToPostCSVFile);
 				} else {
-					Crawler.processPage(urlsFileName,parsingPostsOnWebPage,writeToCSV);
+					Crawler.processPage(urlsFileName, parsingPostsOnWebPage, writeToPostCSVFile);
 				}
 			} else {
 				if(!useUrlsInFile){
-					Crawler.processPage(HomeURL, keyWordsInURL, exclusionKeyWords, parsingPostsOnWebPage, writeToCSV);
+					Crawler.processPage(HomeURL, "", keyWordsInURL, exclusionKeyWords, parsingPostsOnWebPage, writeToPostCSVFile);
 				} else {
-					Crawler.processPage(urlsFileName,parsingPostsOnWebPage,writeToCSV);
+					Crawler.processPage(urlsFileName, parsingPostsOnWebPage, writeToPostCSVFile);
 				}
 			}
 		} else {

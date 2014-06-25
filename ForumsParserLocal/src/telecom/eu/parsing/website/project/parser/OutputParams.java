@@ -39,13 +39,15 @@ public class OutputParams {
 	private static String succedUrlsFileName;
 	private static  String postsFileName;
 	private static String postsParamsFileName;
+	private static WriteToCsvDiscussionsFile writeToCsvDiscussionsFile;
 	
 	
 	public static void  setOutputParams(String failedUrlsFileName, String succedUrlsFileName,
-			String postsFileName, String postsParamsFileName) {
+			String postsFileName, String postsParamsFileName, WriteToCsvDiscussionsFile writeToCsvDiscussionsFile) {
 	
 		OutputParams.failedUrlsFileName = failedUrlsFileName;
 		OutputParams.succedUrlsFileName = succedUrlsFileName;
+		OutputParams.writeToCsvDiscussionsFile = writeToCsvDiscussionsFile;
 		
 		File failedUrlsFile =new File(failedUrlsFileName);
 		if (!failedUrlsFile.exists()) {
@@ -67,6 +69,7 @@ public class OutputParams {
 		
 	}
 		
+
 	public static void appendToFailedUrlsFile(String url){	
 		try {
 			FileWriter writer = new FileWriter(OutputParams.failedUrlsFileName,true);
@@ -104,9 +107,15 @@ public class OutputParams {
 			   }
 			}
 		} catch (IOException e) {
-			Logger.getLogger(OutputParams.class).debug("Execption while appending  Url to Succed URLs  file : "+ e.getMessage());
+			Logger.getLogger(OutputParams.class).debug("Execption while searching  Url to Succed URLs  file : "+ e.getMessage());
 		}
 		return false;
+	}
+	
+	
+	public static void writeToCsvDiscussionsFile(String URL, String title){
+		writeToCsvDiscussionsFile.writeDiscussionsToCSVFile(URL, title);
+		
 	}
 	
 	
@@ -135,7 +144,13 @@ public class OutputParams {
 	public static void setPostsParamsFileName(String postsParamsFileName) {
 		OutputParams.postsParamsFileName = postsParamsFileName;
 	}
-	
+	public static WriteToCsvDiscussionsFile getWriteToCsvDiscussionsFile() {
+		return writeToCsvDiscussionsFile;
+	}
+	public static void setWriteToCsvDiscussionsFile(
+			WriteToCsvDiscussionsFile writeToCsvDiscussionsFile) {
+		OutputParams.writeToCsvDiscussionsFile = writeToCsvDiscussionsFile;
+	}
 	
 
 }

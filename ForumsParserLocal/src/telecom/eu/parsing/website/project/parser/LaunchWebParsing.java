@@ -39,10 +39,11 @@ public class LaunchWebParsing {
 
 		BasicConfigurator.configure();
 
-		//getting the config file URL
+		//set the config file path
 		//String configFilePath = "pathToConfigFile";
 		//String configFilePath = "C:/Users/AissataJo/Desktop/ProjetMineur/Parambethsoft.xml";
-
+		//EECommunityBlog/ConfigFileEECommunityBlog.xml
+		//ATARI/ConfigFileATARI.xml
 		String configFilePath = "C:/Users/AissataJo/Desktop/ProjetMineur/Resultats/ATARI/ConfigFileATARI.xml";
 		if( !(new File(configFilePath).exists()) ){
 			Logger.getLogger(LaunchWebParsing.class).debug("the path to the configuration file is not correct. Please set a corret one.");
@@ -138,13 +139,24 @@ public class LaunchWebParsing {
 			Logger.getLogger(LaunchWebParsing.class).debug("the param delimiterOfPostsFile is not set");
 		}
 
-		// File where post will be store
+		// File where posts will be store
 		String postsFileName =(String) readConfigFile.readParamInXmlFile("postsFileName");
 		if(postsFileName==null) {
 			Logger.getLogger(LaunchWebParsing.class).debug("the param pathToPostsFile is not set");
 		} else {
 			if( !(new File(postsFileName).getParentFile().exists()) ){
 				Logger.getLogger(LaunchWebParsing.class).debug("the path to the posts file is not correct. Please set a corret one.");
+				postsFileName=null;
+			}
+		}
+
+		// File where discussions links and tiles will be stored
+		String discussionsFileName =(String) readConfigFile.readParamInXmlFile("discussionsFileName");
+		if(discussionsFileName==null) {
+			Logger.getLogger(LaunchWebParsing.class).debug("the param discussionsFileName is not set");
+		} else {
+			if( !(new File(discussionsFileName).getParentFile().exists()) ){
+				Logger.getLogger(LaunchWebParsing.class).debug("the path to the discussions file is not correct. Please set a corret one.");
 				postsFileName=null;
 			}
 		}
@@ -190,15 +202,15 @@ public class LaunchWebParsing {
 			if(usePaginationStringValue.equalsIgnoreCase("true")||usePaginationStringValue.equalsIgnoreCase("false")){
 				usePagination =  Boolean.parseBoolean(usePaginationStringValue);
 				if(usePagination){
-					String dicussionsListPageURLStartWith = (String) readConfigFile.readParamInXmlFile("dicussionsListPageURLStartWith");
-					if(dicussionsListPageURLStartWith==null) {
-						Logger.getLogger(LaunchWebParsing.class).debug("the param dicussionsListPageURLStartWith is not set. You must specify it, Initialisation Failed.");
+					String dicussionsListFirstPage = (String) readConfigFile.readParamInXmlFile("dicussionsListFirstPage");
+					if(dicussionsListFirstPage==null) {
+						Logger.getLogger(LaunchWebParsing.class).debug("the param dicussionsListFirstPage is not set. You must specify it, Initialisation Failed.");
 						return;
 					}
 
-					String dicussionListPagination = (String) readConfigFile.readParamInXmlFile("dicussionListPagination");
-					if(dicussionListPagination==null) {
-						Logger.getLogger(LaunchWebParsing.class).debug("the param dicussionListPagination is not set. You must specify it, Initialisation Failed.");
+					String dicussionsListSecondPage = (String) readConfigFile.readParamInXmlFile("dicussionsListSecondPage");
+					if(dicussionsListSecondPage==null) {
+						Logger.getLogger(LaunchWebParsing.class).debug("the param dicussionsListSecondPage is not set. You must specify it, Initialisation Failed.");
 						return;
 					}
 
@@ -208,15 +220,15 @@ public class LaunchWebParsing {
 						return;
 					}
 
-					String postsListPagination = (String) readConfigFile.readParamInXmlFile("postsListPagination");
-					if(postsListPagination==null) {
-						Logger.getLogger(LaunchWebParsing.class).debug("the param postsListPagination is not set. You must specify it, Initialisation Failed.");
+					String postsListPattern = (String) readConfigFile.readParamInXmlFile("postsListPattern");
+					if(postsListPattern==null) {
+						Logger.getLogger(LaunchWebParsing.class).debug("the param postsListPattern is not set. You must specify it, Initialisation Failed.");
 						return;
 					}
-					keyWordsPagination.add(dicussionsListPageURLStartWith);
-					keyWordsPagination.add(dicussionListPagination);
+					keyWordsPagination.add(dicussionsListFirstPage);
+					keyWordsPagination.add(dicussionsListSecondPage);
 					keyWordsPagination.add(postsListPageStartWith);
-					keyWordsPagination.add(postsListPagination);
+					keyWordsPagination.add(postsListPattern);
 				}
 			}
 		}
@@ -228,13 +240,15 @@ public class LaunchWebParsing {
 		if(useParametersFile) {
 			if(useUrlsInFile){
 				if((StartpageUrl == null) || (postsParamsInput==null) || (urlsFileName == null) || (postsFileName==null) ||
-						(postsParamsFileName==null) || (failedUrlsFileName==null) || (succedUrlsFileName==null) || (delimiterOfPostsFile==null)){
+						(postsParamsFileName==null) || (failedUrlsFileName==null) || (succedUrlsFileName==null) || 
+						(delimiterOfPostsFile==null) || (discussionsFileName==null)){
 					Logger.getLogger(LaunchWebParsing.class).debug("Error : At least one of the params is not set or is not correct.");
 					return;
 				} 
 			} else {
 				if((StartpageUrl==null) || (postsParamsInput==null) || (postsFileName==null) || (postsParamsFileName==null) 
-						|| (failedUrlsFileName==null) || (succedUrlsFileName==null) || (delimiterOfPostsFile==null)){
+						|| (failedUrlsFileName==null) || (succedUrlsFileName==null) || (delimiterOfPostsFile==null) ||
+						(discussionsFileName==null)){
 					Logger.getLogger(LaunchWebParsing.class).debug("Error : At least one of the params is not set or is not correct.");
 					return;
 				}
@@ -242,15 +256,17 @@ public class LaunchWebParsing {
 		} else {
 			if(useUrlsInFile){
 				if((urlsFileName==null) || (pageUrlForExample==null) || (StartpageUrl==null) || (date==null) ||
-						(author==null) || (message==null) || (postsFileName==null) || (postsParamsFileName==null)
-						|| (failedUrlsFileName==null) || (succedUrlsFileName==null) || (delimiterOfPostsFile==null)){
+						(author==null) || (message==null) || (postsFileName==null) || (postsParamsFileName==null) || 
+						(failedUrlsFileName==null) || (succedUrlsFileName==null) || (delimiterOfPostsFile==null) ||
+						(discussionsFileName==null)){
 					Logger.getLogger(LaunchWebParsing.class).debug("Error : At least one of the params is not set or is not correct.");
 					return;
 				}
 			} else {
 				if((pageUrlForExample==null) || (StartpageUrl==null) || (date==null) || (author==null) ||
 						(message==null) || (postsFileName==null) || (postsParamsFileName==null)
-						|| (failedUrlsFileName==null) || (succedUrlsFileName==null) || (delimiterOfPostsFile==null) ){
+						|| (failedUrlsFileName==null) || (succedUrlsFileName==null) || (delimiterOfPostsFile==null) ||
+						(discussionsFileName==null)){
 					Logger.getLogger(LaunchWebParsing.class).debug("Error : At least one of the params is not set or is not correct.");
 					return;
 				}
@@ -258,9 +274,9 @@ public class LaunchWebParsing {
 		}
 
 
-		InitParser.startParser(pageUrlForExample,StartpageUrl, date, author, message, 
+		InitParser.startParser(pageUrlForExample, StartpageUrl, date, author, message, 
 				useParametersFile, postsParamsInput, useUrlsInFile, urlsFileName,
-				delimiterOfPostsFile,postsFileName, postsParamsFileName, failedUrlsFileName, succedUrlsFileName,
+				delimiterOfPostsFile, postsFileName, discussionsFileName, postsParamsFileName, failedUrlsFileName, succedUrlsFileName,
 				keyWordsInURL, exclusionKeyWords, usePagination, keyWordsPagination );
 
 	}
