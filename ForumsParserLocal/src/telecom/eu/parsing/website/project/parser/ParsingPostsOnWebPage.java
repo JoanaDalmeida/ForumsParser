@@ -107,29 +107,14 @@ public class ParsingPostsOnWebPage {
 	public Node getAllPostsContainer(Node n, String tagName, String className){
 		if(n!=null){
 			Node parent  =  n.parent();
-			if (((Element) parent).select(tagName+"."+className).size()>1){
-				return parent;
+			if(parent!=null){
+				if (((Element) parent).select(tagName+"."+className).size()>1){
+					return parent;
+				} else {
+					return getAllPostsContainer(parent,tagName, className);
+				}
 			} else {
-				return getAllPostsContainer(parent,tagName, className);
-			}
-		} 
-		return null;
-
-	}
-
-
-	/**
-	 * this method  gets the  container of all posts
-	 * @param text : the text to search
-	 * @return : the node that contains the text
-	 */
-	public Node getPostContainerWithAttributeIdAndClass(Node n){
-		if(n!=null){
-			Node parent  =  n.parent();
-			if (n.hasAttr("id")){
 				return n;
-			} else {
-				return getPostContainerWithAttributeIdAndClass(parent);
 			}
 		} 
 		return null;
@@ -151,7 +136,9 @@ public class ParsingPostsOnWebPage {
 				for (int i=0; i<list_attributes.size(); i++){
 					String attributeHtml =list_attributes.get(i).html();
 					if(attributeHtml.toLowerCase().contains("class=")) {
-						return n;
+						if(list_attributes.get(i).getValue().length()>0) {
+							return n;
+						}
 					} 
 				}
 				return searchDirectParentWithAttribute( n.parent());
@@ -185,7 +172,6 @@ public class ParsingPostsOnWebPage {
 		String allPostsContainerTag=null;
 
 		Node postNode;
-		//postNode=getPostContainerWithAttributeIdAndClass(getPostContainer(body, date, message, author));
 		postNode = searchDirectParentWithAttribute(getPostContainer(body, date, message, author));
 
 		if( postNode != null ) {
@@ -194,20 +180,20 @@ public class ParsingPostsOnWebPage {
 			List <Attribute> list_attributes= attributes.asList();
 			for (int j=0; j<list_attributes.size(); j++) {
 				String attributeHtml =list_attributes.get(j).html();
-				if(attributeHtml.toLowerCase().contains("class=")) {
+				if(attributeHtml.toLowerCase().contains("class=") && list_attributes.get(j).getValue().length()>0) {
 					postContainerClass=removeSpaceInClassName(list_attributes.get(j).getValue());
 				}
 
 			}
 
-			Node parent = searchDirectParentWithAttribute(getAllPostsContainer(postNode,postContainerTag,postContainerClass));
+			Node parent =  searchDirectParentWithAttribute(getAllPostsContainer(postNode,postContainerTag,postContainerClass));
 			if (parent != null){
 				allPostsContainerTag = parent.nodeName();
 				Attributes attributesParent =postNode.parent().attributes();
 				List <Attribute> list_attributesParent= attributesParent.asList();
 				for (int j=0; j<list_attributesParent.size(); j++) {
 					String attributeHtml =list_attributesParent.get(j).html();
-					if(attributeHtml.toLowerCase().contains("class=")) {
+					if(attributeHtml.toLowerCase().contains("class=") && list_attributes.get(j).getValue().length()>0) {
 						allPostsContainerClass=removeSpaceInClassName(list_attributesParent.get(j).getValue());
 						break;
 					}
@@ -224,7 +210,7 @@ public class ParsingPostsOnWebPage {
 			List <Attribute> list_attributes= attributes.asList();
 			for (int j=0; j<list_attributes.size(); j++) {
 				String attributeHtml =list_attributes.get(j).html();
-				if(attributeHtml.toLowerCase().contains("class=")) {
+				if(attributeHtml.toLowerCase().contains("class=") && list_attributes.get(j).getValue().length()>0) {
 					messageContainerClass=removeSpaceInClassName(list_attributes.get(j).getValue());
 					break;
 				}
@@ -239,7 +225,7 @@ public class ParsingPostsOnWebPage {
 			List <Attribute> list_attributes= attributes.asList();
 			for (int j=0; j<list_attributes.size(); j++) {
 				String attributeHtml =list_attributes.get(j).html();
-				if(attributeHtml.toLowerCase().contains("class=")) {
+				if(attributeHtml.toLowerCase().contains("class=") && list_attributes.get(j).getValue().length()>0) {
 					authorContainerClass=removeSpaceInClassName(list_attributes.get(j).getValue());
 					break;
 				}
@@ -254,7 +240,7 @@ public class ParsingPostsOnWebPage {
 			List <Attribute> list_attributes= attributes.asList();
 			for (int j=0; j<list_attributes.size(); j++) {
 				String attributeHtml =list_attributes.get(j).html();
-				if(attributeHtml.toLowerCase().contains("class=")) {
+				if(attributeHtml.toLowerCase().contains("class=") && list_attributes.get(j).getValue().length()>0) {
 					dateContainerClass=removeSpaceInClassName(list_attributes.get(j).getValue());
 					break;
 				}
@@ -327,9 +313,9 @@ public class ParsingPostsOnWebPage {
 				}
 
 				if (elementMessage!=null){
-					textMessage = elementMessage.toString();
+					//textMessage = elementMessage.toString();
 					//to get just the text content
-					//Jsoup.parse(elementMessage.toString().replaceAll("\\<.*?>","")).text();
+					textMessage=Jsoup.parse(elementMessage.toString().replaceAll("\\<.*?>","")).text();
 				}
 
 				if (elementAuthor!=null){
@@ -359,7 +345,7 @@ public class ParsingPostsOnWebPage {
 	 * @param writeToCSV
 	 * @param howTimes
 	 */
-	public void processData(String link, WriteToCSV writeToCSV, int howTimes){
+	public void processData(String link, String urlText, WriteToCsvPostsFile writeToCSV, int howTimes){
 		Document doc;
 		try {
 			doc = Jsoup.connect(link).userAgent("Mozilla").get();
@@ -373,7 +359,7 @@ public class ParsingPostsOnWebPage {
 				OutputParams.appendToFailedUrlsFile(link);
 				Logger.getLogger(InitParser.class).debug("Can't process this URL :" + link +" Content, cause time out exception");	
 			} else {
-				processData(link, writeToCSV, howTimes+1);
+				processData(link, urlText, writeToCSV, howTimes+1);
 			}
 			return;
 		} catch (IOException e) {
@@ -381,7 +367,7 @@ public class ParsingPostsOnWebPage {
 			return;
 		} 
 
-		writeToCSV.WritePostToCSVFile(ids, authors, dates, messages, link);
+		writeToCSV.writePostToCSVFile(ids, authors, dates, messages, link, urlText);
 
 		OutputParams.appendToSuccedUrlsFile(link);
 	}
