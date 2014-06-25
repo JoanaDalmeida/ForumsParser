@@ -29,9 +29,14 @@
 
 
 
+<!--Delimiter of the CSV file in which the program saves all posts-->
+<DelimiterOfPostsFile></DelimiterOfPostsFile>
 
-<!--path of the file in which the program saves all posts-->
+<!--path of the CSV file in which the program saves all posts-->
 <postsFileName></postsFileName>
+
+<!--path of the CSV file in which the program saves all posts-->
+<discussionsFileName></discussionsFileName>
 
 <!--path of the file in which the program saves posts's Parameters-->
 <postsParamsFileName></postsParamsFileName>
@@ -60,14 +65,14 @@
 <usePagination>true</usePagination>
 
 <!-- the first page of discussion Lists-->
-<dicussionsListPageURLStartWith></dicussionsListPageURLStartWith>
-<!-- Specify what change from one discussion Lists Page to another-->
-<dicussionListPagination></dicussionListPagination>
+<dicussionsListFirstPage></dicussionsListFirstPage>
+<!-- Specify the second page of discussion Lists Page -->
+<dicussionsListSecondPage></dicussionsListSecondPage>
 
 <!-- the first page of posts Lists of discussion-->
 <postsListPageStartWith></postsListPageStartWith>
 <!-- Specify what change from one posts Lists Page to another-->
-<postsListPagination></postsListPagination>
+<postsListPattern></postsListPattern>
 
 </PaginationMethod>
 
