@@ -59,10 +59,6 @@ public class ParsingPostsOnWebPage {
 		List <Node> nodes = n.childNodes();
 		for (int i=0; i< nodes.size(); i++){
 			if (nodes.get(i).childNodes().size()>0) {
-				// remove the html tag, to get only text and compare it with tje message, date, author
-				//String content = nodes.get(i).toString().replaceAll("\\<.*?>","");
-				// parse the content to get text in UTF-8 without html accent 
-				//String contentParsed = Jsoup.parse(content).text();
 				String contentParsed = Jsoup.parse(nodes.get(i).outerHtml()).text();
 				if( contentParsed.toLowerCase().contains(author.toLowerCase()) &&
 						contentParsed.toLowerCase().contains(message.toLowerCase()) &&
@@ -84,10 +80,6 @@ public class ParsingPostsOnWebPage {
 		List <Node> nodes = n.childNodes();
 		for (int i=0; i< nodes.size(); i++){
 			if (nodes.get(i).childNodes().size()>0) {
-				// remove the html tag, to get only text and compare it with  message, date, author
-				//String content = nodes.get(i).toString().replaceAll("\\<.*?>","");
-				// parse the content to get text in UTF-8 without html accent 
-				//String contentParsed = Jsoup.parse(content).text();
 				String contentParsed = Jsoup.parse(nodes.get(i).outerHtml()).text();
 				if( contentParsed.toLowerCase().contains(text.toLowerCase())) {
 					return getElementContainer( nodes.get(i),  text);
@@ -281,10 +273,6 @@ public class ParsingPostsOnWebPage {
 		messages = new ArrayList<String>();
 		if (body!=null) {
 			Logger.getLogger(this.getClass() ).debug("Node name "+ body.nodeName());
-			/*Elements elementsAllPostContainer = body.select(PostsParameters.getAllPostsContainerTag()+"."
-					+PostsParameters.getAllPostsContainerClass());
-			for (int i=0; i< elementsAllPostContainer.size(); i++){
-				Element element = elementsAllPostContainer.get(i);*/
 			Elements elementsPosts = body.select(PostsParameters.getPostContainerTag()+"."+PostsParameters.getPostContainerClass());
 			for (int j=0; j<elementsPosts.size(); j++ ){
 				Element elementPost = elementsPosts.get(j);
@@ -313,9 +301,10 @@ public class ParsingPostsOnWebPage {
 				}
 
 				if (elementMessage!=null){
-					//textMessage = elementMessage.toString();
+					//remove space and newline character
+					textMessage = ((elementMessage.toString()).replace(" ", "")).replace("\n", "");
 					//to get just the text content
-					textMessage=Jsoup.parse(elementMessage.toString().replaceAll("\\<.*?>","")).text();
+					//textMessage=Jsoup.parse(elementMessage.toString().replaceAll("\\<.*?>","")).text();
 				}
 
 				if (elementAuthor!=null){

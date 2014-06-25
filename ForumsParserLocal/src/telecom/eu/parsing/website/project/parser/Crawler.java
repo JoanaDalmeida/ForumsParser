@@ -163,7 +163,7 @@ public class Crawler {
 		if(verifyUrlPagination(url, exclusionKeyWords )!=null){
 			if(ParentUrlContainDiscussionLits){
 				if(!url.contains(PaginationParameters.getDiscussionsUrlStart()))
-				OutputParams.getWriteToCsvDiscussionsFile().writeDiscussionsToCSVFile1(url, UrlText);
+				OutputParams.getWriteToCsvDiscussionsFile().findAndReplaceDiscussionsUrlAndTitle(url, UrlText);
 			}
 			if (!OutputParams.searchUrlInSuccedUrlsFile(url)) { 
 				Logger.getLogger(Crawler.class).debug(url);

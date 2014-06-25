@@ -66,34 +66,34 @@ public class WriteToCsvDiscussionsFile {
 			}
 		} 
 	}
-		
-		
-		public  void writeDiscussionsToCSVFile1 (String url, String title) {
-			String content="";
-			try {
-				@SuppressWarnings("resource")
-				final Scanner scanner = new Scanner(new File(WriteToCsvDiscussionsFile.fileName));
-				while (scanner.hasNextLine()) {
-					String lineFromFile = scanner.nextLine();
-					if(lineFromFile.contains(url)) { 
-						String newText="\"" +url +  "\""+ WriteToCsvDiscussionsFile.delimiter + "\""+title+"\"";
-						lineFromFile=newText;
-					}
-					content +=lineFromFile+"\n";
+
+
+	public  void findAndReplaceDiscussionsUrlAndTitle (String url, String title) {
+		String content="";
+		try {
+			@SuppressWarnings("resource")
+			final Scanner scanner = new Scanner(new File(WriteToCsvDiscussionsFile.fileName));
+			while (scanner.hasNextLine()) {
+				String lineFromFile = scanner.nextLine();
+				if(lineFromFile.contains(url)) { 
+					String newText="\"" +url +  "\""+ WriteToCsvDiscussionsFile.delimiter + "\""+title+"\"";
+					lineFromFile=newText;
 				}
-				FileWriter writer = new FileWriter(fileName);
-				writer.append(content);
-				writer.flush();
-				writer.close();
-				
-			} catch (IOException e) {
-				Logger.getLogger(OutputParams.class).debug("Execption while searching  Url to Succed URLs  file : "
-						+ e.getMessage());
+				content +=lineFromFile+"\n";
 			}
+			FileWriter writer = new FileWriter(fileName);
+			writer.append(content);
+			writer.flush();
+			writer.close();
+
+		} catch (IOException e) {
+			Logger.getLogger(OutputParams.class).debug("Execption while searching  Url to Succed URLs  file : "
+					+ e.getMessage());
 		}
-	
-		
-	public static boolean searchTextInDiscussionsFile(String url, String title){
+	}
+
+
+	public  boolean searchTextInDiscussionsFile(String url, String title){
 		try {
 			@SuppressWarnings("resource")
 			final Scanner scanner = new Scanner(new File(WriteToCsvDiscussionsFile.fileName));
@@ -109,5 +109,33 @@ public class WriteToCsvDiscussionsFile {
 		}
 		return false;
 	}
+
+
+	public  String searchPostDiscussion(String url){
+		String discussionUrl = "";
+		if(url.contains(PaginationParameters.getPostsUrlPattern())){
+			String urlWithoutPattern = url.substring(0, url.indexOf(PaginationParameters.getPostsUrlPattern()));
+			try {
+				@SuppressWarnings("resource")
+				final Scanner scanner = new Scanner(new File(WriteToCsvDiscussionsFile.fileName));
+				while (scanner.hasNextLine()) {
+					final String lineFromFile = scanner.nextLine();
+					if(lineFromFile.contains(urlWithoutPattern)) { 
+						discussionUrl = lineFromFile.substring(1, (lineFromFile.indexOf(
+								WriteToCsvDiscussionsFile.delimiter)-1));
+						return discussionUrl;  
+					}
+				}
+			} catch (IOException e) {
+				Logger.getLogger(OutputParams.class).debug("Execption while searching  Url to Succed URLs  file : "
+						+ e.getMessage());
+			}
+		} else {
+			return url;
+		}
+		return discussionUrl;
+	}
+
+
 
 }

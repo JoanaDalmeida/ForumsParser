@@ -41,7 +41,6 @@ public class LaunchWebParsing {
 
 		//set the config file path
 		//String configFilePath = "pathToConfigFile";
-		//String configFilePath = "C:/Users/AissataJo/Desktop/ProjetMineur/Parambethsoft.xml";
 		//EECommunityBlog/ConfigFileEECommunityBlog.xml
 		//ATARI/ConfigFileATARI.xml
 		String configFilePath = "C:/Users/AissataJo/Desktop/ProjetMineur/Resultats/ATARI/ConfigFileATARI.xml";

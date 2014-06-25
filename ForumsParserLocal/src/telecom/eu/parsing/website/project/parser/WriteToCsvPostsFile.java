@@ -45,10 +45,11 @@ public class WriteToCsvPostsFile {
 		}
 		WriteToCsvPostsFile.fileName=fileName;
 		WriteToCsvPostsFile.delimiter=delimiterOfPostsFile;
-		writePostToCSVFile("id", "author", "date","message","URL");
+		writePostToCSVFile("id", "author", "date","message","URL", "DiscussionURL");
 	}
 
-	public void writePostToCSVFile(String id, String author, String date, String message, String URL) {
+	public void writePostToCSVFile(String id, String author, String date, String message, String URL,
+			String discussionsURL) {
 		try {
 			FileWriter writer = new FileWriter(fileName,true);
 			writer.append( "\"" +id +  "\"" );
@@ -60,6 +61,8 @@ public class WriteToCsvPostsFile {
 			writer.append("\""+ message+"\"");
 			writer.append(WriteToCsvPostsFile.delimiter);
 			writer.append("\""+ URL+"\"");
+			writer.append(WriteToCsvPostsFile.delimiter);
+			writer.append("\""+ discussionsURL+"\"");
 			writer.append("\n");
 			writer.flush();
 			writer.close();
@@ -74,7 +77,8 @@ public class WriteToCsvPostsFile {
 			ArrayList<String> messages, String URL, String urlText) {
 		if(ids.size()==authors.size() && ids.size()==dates.size() && ids.size()==messages.size()){
 			for(int i = 0; i<ids.size(); i++){
-				writePostToCSVFile(ids.get(i), authors.get(i), dates.get(i), messages.get(i), URL);
+				writePostToCSVFile(ids.get(i), authors.get(i), dates.get(i), messages.get(i), URL,
+						OutputParams.getWriteToCsvDiscussionsFile().searchPostDiscussion(URL));
 			}
 			if(ids.size()>0){
 				if(!URL.contains(PaginationParameters.getPostsUrlPattern())) {
